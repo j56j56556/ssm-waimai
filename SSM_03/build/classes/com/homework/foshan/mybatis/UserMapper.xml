@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.homework.foshan.mybatis.UserMapper">
+
+
+	<select id="findUserByName" parameterType="String" resultType="com.homework.foshan.object.User">
+		select * from user where username = #{name}
+	</select>
+	
+	<select id="findBusByName" parameterType="String" resultType="com.homework.foshan.object.Business">
+		select * from businesses where bname = #{name}
+	</select>
+	
+	<insert id="addUser" parameterType="com.homework.foshan.object.User" >
+		insert into user (userid,username,userpassword) values (#{userid},#{username},#{userpassword})
+	</insert>
+</mapper>

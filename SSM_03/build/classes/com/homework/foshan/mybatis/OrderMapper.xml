@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homework.foshan.mybatis.OrderMapper">
+
+
+	<resultMap type="com.homework.foshan.object.Order" id="orderfood">
+		<result column="name" property="foodname" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	
+	<!-- 商家查询结果集 -->
+	<resultMap  type="com.homework.foshan.object.Business" id="bususerorderint">
+			<id column="bid" property="bid"/>
+			<result column="bname" property="bname" jdbcType="VARCHAR"/>
+			<result column="passwd" property="passwd" jdbcType="VARCHAR"/>
+			<result column="phone" property="phone" jdbcType="VARCHAR"/>
+			<result column="address" property="address" jdbcType="VARCHAR"/>
+			<result column="bsimg" property="bsimg" jdbcType="VARCHAR"/>	
+			<result column="turnover" property="turnover" jdbcType="DOUBLE"/>			
+			<collection property="users" javaType="list" ofType="User">
+				<result column="username" property="username" jdbcType="VARCHAR"/>
+				<collection property="ordersint" javaType="list" ofType="OrdersInt">
+					<result column="classify" property="cishu" jdbcType="INTEGER"/>
+					<collection property="order" javaType="list" ofType="Order">
+						<id column="id" property="id"></id>
+						<result column="number" property="number" jdbcType="INTEGER"/>
+						<result column="state" property="state" jdbcType="INTEGER"/>
+						<result column="total_cost" property="total_cost" jdbcType="DOUBLE"/>
+						<result column="name" property="foodname" jdbcType="VARCHAR"/>
+						<result column="username" property="username" jdbcType="VARCHAR"/>
+						<result column="customer_id" property="customer_id" jdbcType="INTEGER"/>
+					</collection>
+				</collection>
+			</collection>
+	</resultMap>
+	<!-- 用户查询结果集 -->
+	<resultMap  type="com.homework.foshan.object.User" id="userbusorderint">
+		<id column="userid" property="userid" />
+		<result column="username" property="username" jdbcType="VARCHAR"/>
+		<collection property="businesses" javaType="List" ofType="Business">
+			<id column="bid" property="bid"/>
+			<result column="bname" property="bname" jdbcType="VARCHAR"/>
+			<result column="passwd" property="passwd" jdbcType="VARCHAR"/>
+			<result column="phone" property="phone" jdbcType="VARCHAR"/>
+			<result column="address" property="address" jdbcType="VARCHAR"/>
+			<result column="bsimg" property="bsimg" jdbcType="VARCHAR"/>	
+			<result column="turnover" property="turnover" jdbcType="DOUBLE"/>			
+			<collection property="ordersint" javaType="list" ofType="OrdersInt">
+				<result column="classify" property="cishu" jdbcType="INTEGER"/>
+				<collection property="order" javaType="list" ofType="Order">
+					<id column="id" property="id"></id>
+					<result column="number" property="number" jdbcType="INTEGER"/>
+					<result column="state" property="state" jdbcType="INTEGER"/>
+					<result column="total_cost" property="total_cost" jdbcType="DOUBLE"/>
+					<result column="name" property="foodname" jdbcType="VARCHAR"/>
+					<result column="bname" property="businessname" jdbcType="VARCHAR"/>
+				</collection>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<!-- 用户查询订单 -->
+	<select id="findbydoubleid" parameterType="com.homework.foshan.object.Query1" resultType="com.homework.foshan.object.Order">
+		select * from orders where customer_id = #{customer_id} and goods_id = #{goods_id} and state = #{state}
+	</select>
+	
+	<select id="findUserOrderMessage" parameterType="Integer" resultMap="userbusorderint">
+		select * from orders o 
+		LEFT JOIN food f on o.goods_id=f.id 
+		LEFT JOIN businesses b on b.bid=f.business_id
+		LEFT JOIN user u on o.customer_id=u.userid 
+		<where>
+			AND customer_id = #{userid}	
+		</where>
+		order by classify asc
+	</select >
+	
+	<!-- 商家查询订单 -->
+	<select id="findBusOrderMessage" parameterType="Integer" resultMap="bususerorderint">
+		select * from orders o 
+		LEFT JOIN food f on o.goods_id=f.id 
+		LEFT JOIN businesses b on b.bid=f.business_id 
+		LEFT JOIN user u on o.customer_id=u.userid
+		<where>
+			AND bid = #{bid}	
+		</where>
+		order by classify asc
+	</select >
+	
+	<select id="findusemaxclassify" parameterType="com.homework.foshan.object.Query1" resultType="Integer"> 
+		select max(classify) classify from orders
+		<where>
+		AND customer_id = #{userid}
+		<foreach collection="foodsid" item="foodsid" open="and goods_id IN (" close=")" separator=",">
+			#{foodsid}
+		</foreach>			
+		</where>
+	</select>
+	
+	<update id="userCommitOrder" parameterType="com.homework.foshan.object.Query1">		
+		update orders 
+		set state=#{state},classify=#{newclassify}
+		<where>
+		AND customer_id = #{userid} AND classify = #{classify}
+		<foreach collection="foodsid" item="foodsid" open="and goods_id IN (" close=")" separator=",">
+			#{foodsid}
+		</foreach>			
+		</where>
+	</update>
+	
+	<update id="busOperateOrder" parameterType="com.homework.foshan.object.Query1">
+		update orders 
+		set state=#{state}
+		<where>
+		AND customer_id = #{userid} AND classify = #{classify}
+		<foreach collection="foodsid" item="foodsid" open="and goods_id IN (" close=")" separator=",">
+			#{foodsid}
+		</foreach>			
+		</where>
+	</update>
+	
+	<select id="findbyuserid" parameterType="com.homework.foshan.object.Query1" resultMap="orderfood">
+		select goods_id,number,total_cost,f.name from orders o LEFT JOIN food f on o.goods_id=f.id
+		<where>
+		AND customer_id = #{userid} AND state = #{state}
+		<foreach collection="foodsid" item="foodsid" open="and goods_id IN (" close=")" separator=",">
+			#{foodsid}
+		</foreach>
+			
+		</where>
+	</select>
+	<delete id="deleteorder"  parameterType="com.homework.foshan.object.Order">
+		delete from orders where customer_id=#{customer_id} and goods_id=#{goods_id} and state=#{state}
+	</delete>
+	<insert id="addorder" parameterType="com.homework.foshan.object.Order">
+		insert into orders (customer_id,goods_id,number,state,classify) 
+		values (#{customer_id},#{goods_id},#{number},#{state},#{classify})
+	</insert>
+	
+	<update id="updatenum" parameterType="com.homework.foshan.object.Order">
+		update orders
+		set number = #{number}
+		where customer_id = #{customer_id} and goods_id = #{goods_id} and state = #{state}
+	</update>
+	
+	<update id="updatestate" parameterType="com.homework.foshan.object.Order">
+		update orders
+		set state = #{state}
+		where customer_id = #{customer_id} and goods_id = #{goods_id} and state = #{state}
+	</update>
+	
+	
+	
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.homework.foshan.mybatis.FoodMapper">
+
+
+	<select id="findfoodbybusid" parameterType="Integer" resultType="com.homework.foshan.object.Food">
+		select * from food where business_id = #{id}
+	</select>
+	
+	<select id="findfoodidbybusid" parameterType="Integer" resultType="Integer">
+		select id from food where business_id = #{id}
+	</select>
+	<insert id="addfood" parameterType="com.homework.foshan.object.Food">
+		insert into food (id,name,business_id,price,fdimg)
+		 values(#{id},#{name},#{business_id},#{price},#{fdimg})
+	</insert>	
+	<update id="updatefood" parameterType="com.homework.foshan.object.Food">
+		update food
+		set name=#{name},price=#{price},fdimg=#{fdimg}
+		where id=#{id}
+	</update>
+	
+	<delete id="deletefood" parameterType="Integer">
+		delete from food where id=#{id}
+	</delete>
+	
+</mapper>

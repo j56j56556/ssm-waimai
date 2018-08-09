@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.homework.foshan.mybatis.BusinessMapper">
+
+
+	<select id="findBusinessall" resultType="com.homework.foshan.object.Business">
+		select * from businesses
+	</select>
+	<select id="findBusinessbyid" parameterType="Integer" resultType="com.homework.foshan.object.Business">
+		select * from businesses where bid=#{id}
+	</select>
+	<select id="findBusinessbyName" parameterType="String" resultType="com.homework.foshan.object.Business">
+		select * from businesses where bname=#{bname}
+	</select>
+	<select id="findLimitBusiness" parameterType="QueryLimitPage" resultType="com.homework.foshan.object.Business">
+		select * from businesses limit #{start},#{linenum}
+	</select>
+
+</mapper>
